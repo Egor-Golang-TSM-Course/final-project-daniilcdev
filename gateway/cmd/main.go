@@ -1,9 +1,12 @@
 package main
 
-import "log"
+import (
+	"hash-system/gateway/internal"
+	"log"
+)
 
 func main() {
-	if err := startGateway(); err != nil {
+	if err := internal.StartApiServer(); err != nil {
 		log.Fatalln(err)
 	}
 }
