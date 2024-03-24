@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	if err := grpc.Serve(":9000"); err != nil {
+	if err := grpc.Serve(":9000", NewInMemoryStorage()); err != nil {
 		log.Fatalln(err)
 	}
 }
