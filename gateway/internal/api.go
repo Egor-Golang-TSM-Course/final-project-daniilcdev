@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	client "hash-system/hashing/pkg"
+	client "hash-system/hashing/pkg/grpc-client"
 	"net/http"
 )
 
@@ -12,7 +12,7 @@ var cl client.HashServiceClient
 
 func StartApiServer() error {
 	var err error
-	cl, err = client.New()
+	cl, err = client.New(":9000")
 
 	if err != nil {
 		return err

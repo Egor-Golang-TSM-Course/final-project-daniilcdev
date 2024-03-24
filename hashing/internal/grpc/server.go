@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+var grpcServer *grpc.Server
+
 func Serve(addr string, storage client.HashStorage) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -16,8 +18,12 @@ func Serve(addr string, storage client.HashStorage) error {
 	}
 
 	hss := &hashingServerService{storage: storage}
-	grpcServer := grpc.NewServer()
+	grpcServer = grpc.NewServer()
 	pb.RegisterHashServiceServer(grpcServer, hss)
 
 	return grpcServer.Serve(listener)
+}
+
+func Stop() {
+	grpcServer.GracefulStop()
 }

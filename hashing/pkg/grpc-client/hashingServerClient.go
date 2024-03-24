@@ -1,4 +1,4 @@
-package client
+package grpcClient
 
 import (
 	"context"
@@ -16,9 +16,13 @@ type HashServiceClient interface {
 	CloseConn()
 }
 
-func New() (HashServiceClient, error) {
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	conn, err := grpc.Dial(":9000", opts...)
+type hashServiceClient struct {
+	rpc pb.HashServiceClient
+	cc  *grpc.ClientConn
+}
+
+func New(addr string) (HashServiceClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		return nil, err
@@ -26,12 +30,7 @@ func New() (HashServiceClient, error) {
 
 	grpcClient := pb.NewHashServiceClient(conn)
 
-	return &hashServiceClient{rpc: grpcClient}, err
-}
-
-type hashServiceClient struct {
-	rpc pb.HashServiceClient
-	cc  grpc.ClientConn
+	return &hashServiceClient{rpc: grpcClient, cc: conn}, err
 }
 
 func (hsc *hashServiceClient) GetHash(ctx context.Context, in string) (string, error) {
