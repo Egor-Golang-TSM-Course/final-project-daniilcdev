@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"hash-system/hashing/internal/grpc/pb"
 	client "hash-system/hashing/pkg"
 )
@@ -28,6 +29,10 @@ func (hss *hashingServerService) CheckHash(ctx context.Context, payload *pb.Hash
 }
 
 func (hss *hashingServerService) CreateHash(ctx context.Context, payload *pb.HashingPayload) (*pb.Hash, error) {
+	if payload.Src == "" {
+		return nil, errors.New("can't create hash for empty string")
+	}
+
 	hash := base64.StdEncoding.EncodeToString([]byte(payload.Src))
 
 	hss.storage.Add(payload.Src, hash)
