@@ -1,4 +1,4 @@
-package main
+package adapters
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ func NewInMemoryStorage() client.HashStorage {
 
 func (ims *InMemoryStorage) Contains(hash string) bool {
 	ims.mu.RLock()
-	defer ims.mu.Unlock()
+	defer ims.mu.RUnlock()
 
 	_, ok := ims.hashes[hash]
 	return ok
@@ -30,7 +30,7 @@ func (ims *InMemoryStorage) Contains(hash string) bool {
 
 func (ims *InMemoryStorage) Get(payload string) (string, error) {
 	ims.mu.RLock()
-	defer ims.mu.Unlock()
+	defer ims.mu.RUnlock()
 	hash, ok := ims.cache[payload]
 
 	if !ok {
