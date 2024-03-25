@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "hash_msg.proto";
+
+option go_package = "./pb";
+
+service HashService {
+    rpc GetHash(HashingPayload) returns (Hash) {}
+    rpc CheckHash(HashedPayload) returns (Exists) {}
+    rpc CreateHash(HashingPayload) returns (Hash) {}
+}

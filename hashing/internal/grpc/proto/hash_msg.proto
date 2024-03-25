@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+message Hash {
+    string value = 1;
+}
+
+message Exists {
+    bool value = 1;
+}
+
+message HashingPayload{
+    string src = 1;
+}
+
+message HashedPayload{
+    string hash = 1;
+}
