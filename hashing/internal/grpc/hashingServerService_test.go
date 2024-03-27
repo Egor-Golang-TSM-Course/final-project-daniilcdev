@@ -1,9 +1,9 @@
-package grpc
+package grpcHashing
 
 import (
 	"context"
-	"hash-system/hashing/cmd/adapters"
-	"hash-system/hashing/internal/grpc/pb"
+	"shared/pkg/adapters"
+	"shared/pkg/grpc/pb"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

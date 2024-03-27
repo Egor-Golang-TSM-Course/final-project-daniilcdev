@@ -2,7 +2,7 @@ package adapters
 
 import (
 	"errors"
-	client "hash-system/hashing/pkg"
+	shared "shared/pkg"
 	"sync"
 )
 
@@ -12,7 +12,7 @@ type InMemoryStorage struct {
 	mu     *sync.RWMutex
 }
 
-func NewInMemoryStorage() client.HashStorage {
+func NewInMemoryStorage() shared.HashStorage {
 	return &InMemoryStorage{
 		cache:  make(map[string]string, 64),
 		hashes: make(map[string]struct{}, 64),

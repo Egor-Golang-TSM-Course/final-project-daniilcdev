@@ -6,10 +6,10 @@ import (
 	"net/http"
 )
 
-func method(m string, source func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func method(m string, next func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	wrapper := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == m {
-			source(w, r)
+			next(w, r)
 		} else {
 			fmt.Fprintf(w, "%d: method not allowed\n", http.StatusMethodNotAllowed)
 		}
@@ -24,6 +24,7 @@ func serveBody(handler func(ctx context.Context, body []byte) ([]byte, error)) f
 		_, err := r.Body.Read(body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		defer r.Body.Close()

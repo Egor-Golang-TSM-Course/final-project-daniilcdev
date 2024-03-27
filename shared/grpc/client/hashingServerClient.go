@@ -1,8 +1,8 @@
-package grpcClient
+package grpcProxy
 
 import (
 	"context"
-	"hash-system/hashing/internal/grpc/pb"
+	"shared/grpc/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,9 +28,9 @@ func New(addr string) (HashServiceClient, error) {
 		return nil, err
 	}
 
-	grpcClient := pb.NewHashServiceClient(conn)
+	client := pb.NewHashServiceClient(conn)
 
-	return &hashServiceClient{rpc: grpcClient, cc: conn}, err
+	return &hashServiceClient{rpc: client, cc: conn}, err
 }
 
 func (hsc *hashServiceClient) GetHash(ctx context.Context, in string) (string, error) {

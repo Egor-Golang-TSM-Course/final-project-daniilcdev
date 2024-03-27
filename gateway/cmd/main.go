@@ -1,7 +1,7 @@
 package main
 
 import (
-	"hash-system/gateway/internal"
+	internal "gateway/internal"
 	"log"
 )
 

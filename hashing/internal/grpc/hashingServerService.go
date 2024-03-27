@@ -1,16 +1,16 @@
-package grpc
+package grpcHashing
 
 import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"hash-system/hashing/internal/grpc/pb"
-	client "hash-system/hashing/pkg"
+	pb "shared/grpc/pb"
+	shared "shared/pkg"
 )
 
 type hashingServerService struct {
 	pb.UnimplementedHashServiceServer
-	storage client.HashStorage
+	storage shared.HashStorage
 }
 
 func (hss *hashingServerService) GetHash(ctx context.Context, payload *pb.HashingPayload) (*pb.Hash, error) {

@@ -1,4 +1,4 @@
-package client
+package shared
 
 type HashStorage interface {
 	Contains(hash string) bool

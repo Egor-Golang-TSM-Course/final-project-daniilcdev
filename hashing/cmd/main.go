@@ -1,13 +1,13 @@
 package main
 
 import (
-	"hash-system/hashing/cmd/adapters"
-	"hash-system/hashing/internal/grpc"
+	grpcHashing "hashing/internal/grpc"
 	"log"
+	adapters "shared/adapters"
 )
 
 func main() {
-	if err := grpc.Serve(":9000", adapters.NewInMemoryStorage()); err != nil {
+	if err := grpcHashing.Serve(":9000", adapters.NewInMemoryStorage()); err != nil {
 		log.Fatalln(err)
 	}
 }

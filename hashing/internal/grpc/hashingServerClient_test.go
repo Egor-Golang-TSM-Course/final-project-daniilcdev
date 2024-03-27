@@ -1,11 +1,10 @@
-package grpcClient
+package grpcHashing
 
 import (
 	"context"
-	adapters "hash-system/hashing/cmd/adapters"
-	grpcServer "hash-system/hashing/internal/grpc"
-	client "hash-system/hashing/pkg"
 	"log"
+	shared "shared/pkg"
+	sharedadapters "shared/pkg/adapters"
 
 	"time"
 
@@ -16,9 +15,9 @@ import (
 
 func TestNewClient(t *testing.T) {
 	const addr = ":9001"
-	defer bootServer(addr, adapters.NewInMemoryStorage())()
+	defer bootServer(addr, sharedadapters.NewInMemoryStorage())()
 
-	cl, err := New(addr)
+	cl, err := shared.New(addr)
 	defer cl.CloseConn()
 
 	assert.NoError(t, err)
@@ -27,20 +26,20 @@ func TestNewClient(t *testing.T) {
 
 func TestNewClientFailed(t *testing.T) {
 	const addr = ":9001"
-	defer bootServer(addr, adapters.NewInMemoryStorage())()
+	defer bootServer(addr, sharedadapters.NewInMemoryStorage())()
 
-	cl, err := New("")
+	cl, err := shared.New("")
 
 	assert.Error(t, err)
 	assert.Nil(t, cl)
 }
 
-func TestCreateHash(t *testing.T) {
+func TestClient_CreateHash(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.CreateHash(context.Background(), "some-payload")
@@ -49,12 +48,12 @@ func TestCreateHash(t *testing.T) {
 	assert.NotNil(t, hash)
 }
 
-func TestCreateHashForEmptyPayload(t *testing.T) {
+func TestClient_CreateHashForEmptyPayload(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.CreateHash(context.Background(), "")
@@ -65,13 +64,13 @@ func TestCreateHashForEmptyPayload(t *testing.T) {
 	tearDown()
 }
 
-func TestCheckHash(t *testing.T) {
+func TestClient_CheckHash(t *testing.T) {
 	const addr = ":9001"
-	storage := adapters.NewInMemoryStorage()
+	storage := sharedadapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 
 	hash, _ := cl.CreateHash(context.Background(), "some-payload")
@@ -83,11 +82,11 @@ func TestCheckHash(t *testing.T) {
 
 func TestCheckHashThatDoesNotCreated(t *testing.T) {
 	const addr = ":9001"
-	storage := adapters.NewInMemoryStorage()
+	storage := sharedadapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 
 	exists, err := cl.CheckHash(context.Background(), "some-hash")
@@ -96,13 +95,13 @@ func TestCheckHashThatDoesNotCreated(t *testing.T) {
 	assert.False(t, exists)
 }
 
-func TestGetHash(t *testing.T) {
+func TestClient_GetHash(t *testing.T) {
 	const addr = ":9001"
-	storage := adapters.NewInMemoryStorage()
+	storage := sharedadapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 	created, _ := cl.CreateHash(context.Background(), "some-payload")
 	hash, err := cl.GetHash(context.Background(), "some-payload")
@@ -112,12 +111,12 @@ func TestGetHash(t *testing.T) {
 	assert.Equal(t, created, hash)
 }
 
-func TestGetHashReturnsErrorWhenNoHash(t *testing.T) {
+func TestClient_GetHashReturnsErrorWhenNoHash(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := New(addr)
+	cl, _ := shared.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.GetHash(context.Background(), "some-payload")
@@ -126,9 +125,9 @@ func TestGetHashReturnsErrorWhenNoHash(t *testing.T) {
 	assert.Empty(t, hash)
 }
 
-func bootServer(addr string, storage client.HashStorage) func() {
+func bootServer(addr string, storage shared.HashStorage) func() {
 	go func(addr string) {
-		err := grpcServer.Serve(addr, storage)
+		err := Serve(addr, storage)
 		if err != nil {
 			log.Fatalln(err)
 		}
