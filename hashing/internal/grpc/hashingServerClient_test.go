@@ -3,8 +3,9 @@ package grpcHashing
 import (
 	"context"
 	"log"
+	adapters "shared/adapters"
+	grpcProxy "shared/grpc/client"
 	shared "shared/pkg"
-	sharedadapters "shared/pkg/adapters"
 
 	"time"
 
@@ -15,9 +16,9 @@ import (
 
 func TestNewClient(t *testing.T) {
 	const addr = ":9001"
-	defer bootServer(addr, sharedadapters.NewInMemoryStorage())()
+	defer bootServer(addr, adapters.NewInMemoryStorage())()
 
-	cl, err := shared.New(addr)
+	cl, err := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	assert.NoError(t, err)
@@ -26,9 +27,9 @@ func TestNewClient(t *testing.T) {
 
 func TestNewClientFailed(t *testing.T) {
 	const addr = ":9001"
-	defer bootServer(addr, sharedadapters.NewInMemoryStorage())()
+	defer bootServer(addr, adapters.NewInMemoryStorage())()
 
-	cl, err := shared.New("")
+	cl, err := grpcProxy.New("")
 
 	assert.Error(t, err)
 	assert.Nil(t, cl)
@@ -36,10 +37,10 @@ func TestNewClientFailed(t *testing.T) {
 
 func TestClient_CreateHash(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.CreateHash(context.Background(), "some-payload")
@@ -50,10 +51,10 @@ func TestClient_CreateHash(t *testing.T) {
 
 func TestClient_CreateHashForEmptyPayload(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.CreateHash(context.Background(), "")
@@ -66,11 +67,11 @@ func TestClient_CreateHashForEmptyPayload(t *testing.T) {
 
 func TestClient_CheckHash(t *testing.T) {
 	const addr = ":9001"
-	storage := sharedadapters.NewInMemoryStorage()
+	storage := adapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	hash, _ := cl.CreateHash(context.Background(), "some-payload")
@@ -82,11 +83,11 @@ func TestClient_CheckHash(t *testing.T) {
 
 func TestCheckHashThatDoesNotCreated(t *testing.T) {
 	const addr = ":9001"
-	storage := sharedadapters.NewInMemoryStorage()
+	storage := adapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	exists, err := cl.CheckHash(context.Background(), "some-hash")
@@ -97,11 +98,11 @@ func TestCheckHashThatDoesNotCreated(t *testing.T) {
 
 func TestClient_GetHash(t *testing.T) {
 	const addr = ":9001"
-	storage := sharedadapters.NewInMemoryStorage()
+	storage := adapters.NewInMemoryStorage()
 	tearDown := bootServer(addr, storage)
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 	created, _ := cl.CreateHash(context.Background(), "some-payload")
 	hash, err := cl.GetHash(context.Background(), "some-payload")
@@ -113,10 +114,10 @@ func TestClient_GetHash(t *testing.T) {
 
 func TestClient_GetHashReturnsErrorWhenNoHash(t *testing.T) {
 	const addr = ":9001"
-	tearDown := bootServer(addr, sharedadapters.NewInMemoryStorage())
+	tearDown := bootServer(addr, adapters.NewInMemoryStorage())
 	defer tearDown()
 
-	cl, _ := shared.New(addr)
+	cl, _ := grpcProxy.New(addr)
 	defer cl.CloseConn()
 
 	hash, err := cl.GetHash(context.Background(), "some-payload")

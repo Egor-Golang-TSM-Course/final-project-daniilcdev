@@ -1,6 +1,7 @@
 package grpcHashing
 
 import (
+	"log"
 	"net"
 
 	pb "shared/grpc/pb"
@@ -21,6 +22,7 @@ func Serve(addr string, storage shared.HashStorage) error {
 	grpcServer = grpc.NewServer()
 	pb.RegisterHashServiceServer(grpcServer, hss)
 
+	log.Default().Println("starting gRPC...")
 	return grpcServer.Serve(listener)
 }
 

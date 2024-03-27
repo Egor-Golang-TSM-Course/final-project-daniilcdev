@@ -2,8 +2,8 @@ package grpcHashing
 
 import (
 	"context"
-	"shared/pkg/adapters"
-	"shared/pkg/grpc/pb"
+	adapters "shared/adapters"
+	pb "shared/grpc/pb"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

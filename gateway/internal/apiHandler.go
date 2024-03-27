@@ -4,14 +4,29 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
+	grpcProxy "shared/grpc/client"
 )
 
 type apiHandler struct {
-	cl shared.HashServiceClient
+	cl grpcProxy.HashServiceClient
+}
+
+func StartApiServer() error {
+	apiHandler, err := New()
+	if err != nil {
+		return err
+	}
+
+	http.HandleFunc("/getHash", method(http.MethodGet, serveQuery("payload", apiHandler.getHash)))
+	http.HandleFunc("/checkHash", method(http.MethodGet, serveQuery("hash", apiHandler.checkHash)))
+	http.HandleFunc("/createHash", method(http.MethodPost, serveBody(apiHandler.createHash)))
+
+	return http.ListenAndServe(":8080", nil)
 }
 
 func New() (*apiHandler, error) {
-	cl, err := shared.New(":9000")
+	cl, err := grpcProxy.New(":9000")
 
 	if err != nil {
 		return nil, err
