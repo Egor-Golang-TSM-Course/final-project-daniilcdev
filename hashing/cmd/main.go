@@ -4,10 +4,12 @@ import (
 	grpcHashing "hashing/internal/grpc"
 	"log"
 	adapters "shared/adapters"
+	"shared/cfg"
 )
 
 func main() {
-	if err := grpcHashing.Serve("hashing:9000", adapters.NewInMemoryStorage()); err != nil {
+	vars := cfg.Load()
+	if err := grpcHashing.Serve(vars.HashingServiceAddr, adapters.NewInMemoryStorage()); err != nil {
 		log.Fatalln(err)
 	}
 }

@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"gateway/transport"
+	"log"
 	"net/http"
+	"shared/cfg"
 	grpcProxy "shared/grpc/client"
 )
 
@@ -12,8 +15,8 @@ type apiHandler struct {
 	cl grpcProxy.HashServiceClient
 }
 
-func StartApiServer() error {
-	apiHandler, err := New()
+func StartApiServer(vars *cfg.EnvConfig) error {
+	apiHandler, err := New(vars)
 	if err != nil {
 		return err
 	}
@@ -22,11 +25,12 @@ func StartApiServer() error {
 	http.HandleFunc("/checkHash", method(http.MethodGet, serveQuery("hash", apiHandler.checkHash)))
 	http.HandleFunc("/createHash", method(http.MethodPost, serveBody(apiHandler.createHash)))
 
-	return http.ListenAndServe(":8080", nil)
+	log.Printf("Starting gateway at %s", vars.GatewayPort)
+	return http.ListenAndServe(vars.GatewayPort, nil)
 }
 
-func New() (*apiHandler, error) {
-	cl, err := grpcProxy.New("hashing:9000")
+func New(vars *cfg.EnvConfig) (*apiHandler, error) {
+	cl, err := grpcProxy.New(vars.HashingServiceAddr)
 
 	if err != nil {
 		return nil, err
@@ -41,16 +45,13 @@ func (api *apiHandler) getHash(ctx context.Context, payload string) ([]byte, err
 	if payload == "" {
 		return nil, errors.New("payload cannot be empty")
 	}
-	type response struct {
-		Hash string `json:"hash"`
-	}
 
 	hash, err := api.cl.GetHash(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
 
-	return json.Marshal(response{Hash: hash})
+	return json.Marshal(transport.ResponseWithHash{Hash: hash})
 }
 
 func (api *apiHandler) checkHash(ctx context.Context, hash string) ([]byte, error) {
@@ -64,11 +65,7 @@ func (api *apiHandler) checkHash(ctx context.Context, hash string) ([]byte, erro
 		return nil, err
 	}
 
-	type response struct {
-		Exists bool `json:"exists"`
-	}
-
-	return json.Marshal(response{Exists: exists})
+	return json.Marshal(transport.ResponseExists{Exists: exists})
 }
 
 func (api *apiHandler) createHash(ctx context.Context, body []byte) ([]byte, error) {
@@ -76,24 +73,16 @@ func (api *apiHandler) createHash(ctx context.Context, body []byte) ([]byte, err
 		return nil, errors.New("cannot create hash for empty payload")
 	}
 
-	type payload struct {
-		Src string `json:"src"`
-	}
-
-	var p payload
+	var p transport.RequestWithPayload
 	if err := json.Unmarshal(body, &p); err != nil {
 		return nil, err
 	}
 
-	hash, err := api.cl.CreateHash(ctx, p.Src)
+	hash, err := api.cl.CreateHash(ctx, p.Payload)
 
 	if err != nil {
 		return nil, err
 	}
 
-	type response struct {
-		Hash string `json:"hash"`
-	}
-
-	return json.Marshal(response{Hash: hash})
+	return json.Marshal(transport.ResponseWithHash{Hash: hash})
 }

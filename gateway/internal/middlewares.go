@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -27,14 +26,13 @@ func serveBody(handler func(ctx context.Context, body []byte) ([]byte, error)) f
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Println(string(body))
+
 		defer r.Body.Close()
 
 		if result, err := handler(r.Context(), body); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		} else {
 			w.Write(result)
-			w.WriteHeader(http.StatusOK)
 		}
 	}
 }
@@ -51,7 +49,6 @@ func serveQuery(param string, handler func(ctx context.Context, q string) ([]byt
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		} else {
 			w.Write(result)
-			w.WriteHeader(http.StatusOK)
 		}
 	}
 }

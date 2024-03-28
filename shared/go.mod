@@ -3,6 +3,7 @@ module shared
 go 1.21.3
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0

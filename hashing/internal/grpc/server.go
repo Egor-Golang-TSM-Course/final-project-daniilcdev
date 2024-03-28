@@ -27,5 +27,6 @@ func Serve(addr string, storage shared.HashStorage) error {
 }
 
 func Stop() {
+	log.Default().Println("stopping gRPC...")
 	grpcServer.GracefulStop()
 }

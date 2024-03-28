@@ -7,14 +7,25 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    environment:
+      HASHING_ADDRESS: "hashing:9000"
+    networks:
+      - "hashservice"
 
   gateway:
     build:
       context: .
       dockerfile: gateway/Dockerfile
     environment:
-      SERVER_ADDRESS: 'hashing:9000'
+      HASHING_ADDRESS: "hashing:9000"
+      GATEWAY_PORT: ":8080"
     ports:
       - "8080:8080"
+    networks:
+      - "hashservice"
     depends_on:
       - hashing
+
+networks:
+  hashservice:
+    name: "hashservice"
