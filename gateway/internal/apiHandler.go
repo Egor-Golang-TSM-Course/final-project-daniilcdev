@@ -26,7 +26,7 @@ func StartApiServer() error {
 }
 
 func New() (*apiHandler, error) {
-	cl, err := grpcProxy.New(":9000")
+	cl, err := grpcProxy.New("hashing:9000")
 
 	if err != nil {
 		return nil, err

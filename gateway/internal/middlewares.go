@@ -3,6 +3,8 @@ package internal
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 )
 
@@ -20,13 +22,12 @@ func method(m string, next func(http.ResponseWriter, *http.Request)) func(http.R
 
 func serveBody(handler func(ctx context.Context, body []byte) ([]byte, error)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var body []byte
-		_, err := r.Body.Read(body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
+		log.Println(string(body))
 		defer r.Body.Close()
 
 		if result, err := handler(r.Context(), body); err != nil {

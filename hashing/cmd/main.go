@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := grpcHashing.Serve(":9000", adapters.NewInMemoryStorage()); err != nil {
+	if err := grpcHashing.Serve("hashing:9000", adapters.NewInMemoryStorage()); err != nil {
 		log.Fatalln(err)
 	}
 }
